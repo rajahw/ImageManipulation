@@ -2,37 +2,27 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-void resizeImageToDisplay(DisplayedImage&);
+void uploadImage(DisplayedImage&, SelectionPanel&);
+void updateImageInstructions(DisplayedImage&, SelectionPanel&);
 void getTopColors(DisplayedImage&, SelectionPanel&);
-void cropImage(DisplayedImage&);
-void updateImageInstructions(DisplayedImage&);
+void changeTopColors(DisplayedImage&, SelectionPanel&, Cursor&);
+//void cropImage(DisplayedImage&);
 bool coloredButton(Rectangle, Color);
 
 int main() {
-    InitWindow(1920, 1080, "Image Processor");
+    InitWindow(1920, 1080, "Image Manipulation");
     SetTargetFPS(60);
 
     SelectionPanel panel;
     DisplayedImage img;
     Cursor mouse;
     YesNoPopup cropConfirmation;
-    bool color1ButtonPressed = false;
-    bool color2ButtonPressed = false;
-    bool color3ButtonPressed = false;
-    bool getImageButtonPressed = false;
-    bool reloadPaletteButtonPressed = false;
-    bool cropImageButtonPressed = false;
     bool statsPrinted = false;
-    bool paletteLoaded = false;
-    bool cropping = false;
-    char getImageInstructions[128] = "Type the file name of your image (including png or jpg/jpeg extension)\n\nto retrieve it";
-    char fileNameInput[128] = "";
-    char fileName[128]  = "";
-    char fileExtension[128] = "";
-    char fileString[128] = "assets/jeans.png";
+
     GuiLoadStyle("assets/style_dark.rgs");
     GuiSetStyle(DEFAULT, TEXT_SIZE, 32);
-    img.image = LoadImage(fileString);
+
+    uploadImage(img, panel);
 
     while (!WindowShouldClose()) {
         BeginDrawing();
@@ -43,9 +33,9 @@ int main() {
             mouse.position = GetMousePosition();
 
             //Update
-            if (!paletteLoaded) {
+            if (!panel.paletteLoaded) {
                 getTopColors(img, panel);
-                paletteLoaded = true;
+                panel.paletteLoaded = true;
             }
 
             if (!statsPrinted) {
@@ -55,12 +45,13 @@ int main() {
                 statsPrinted = true;
             }
 
-            if (getImageButtonPressed) {
+            if (panel.getImageButtonPressed) {
                 std::cout << "Get Image Button Pressed" << '\n';
-                //uploadImage
+                updateImageInstructions(img, panel);
+                uploadImage(img, panel);
             }
 
-            if (reloadPaletteButtonPressed) {
+            if (panel.reloadPaletteButtonPressed) {
                 std::cout << "Reload Palette Button Pressed" << '\n';
                 
                 panel.color1 = panel.oldColor1;
@@ -68,29 +59,51 @@ int main() {
                 panel.color3 = panel.oldColor3;
             }
 
-            if (cropImageButtonPressed) {
+            if (panel.cropImageButtonPressed) {
                 std::cout << "Crop Image Button Pressed" << '\n';
-                cropping = true;
+                panel.croppingImage = true;
             }
 
-            if (color1ButtonPressed) {
+            if (panel.color1ButtonPressed) {
                 std::cout << "Color 1 Button Pressed" << '\n';
                 mouse.selectedRec = 1;
             }
 
-            if (color2ButtonPressed) {
+            if (panel.color2ButtonPressed) {
                 std::cout << "Color 2 Button Pressed" << '\n';
                 mouse.selectedRec = 2;
             }
 
-            if (color3ButtonPressed) {
+            if (panel.color3ButtonPressed) {
                 std::cout << "Color 3 Button Pressed" << '\n';
                 mouse.selectedRec = 3;
             }
             
-            if (!cropping) {
+            if ((mouse.selectedRec == 1 || mouse.selectedRec == 2 || mouse.selectedRec == 3)) {
                 changeTopColors(img, panel, mouse);
             }
+
+            //Draw Image
+            DrawTextureV(img.texture, {img.rectangle.x, img.rectangle.y}, WHITE);
+
+            /* Make this work so that the croppedRec doesn't persist
+            if (cropping) {
+                DrawRectangleRec(mouse.croppedRec, {0, 0, 255, 65});
+            }
+            */
+
+            //Draw Selection UI
+            GuiPanel(panel.rectangle, NULL);
+            panel.getImageButtonPressed = GuiButton(panel.getImageButtonRec, "GET IMAGE");
+            panel.reloadPaletteButtonPressed = GuiButton(panel.reloadPaletteButtonRec, "RELOAD PALETTE");
+            panel.cropImageButtonPressed = GuiButton(panel.cropImageButtonRec, "CROP IMAGE");
+            GuiTextBox(panel.imageInputRec, panel.fileNameInput, 128, true);
+            panel.color1ButtonPressed = coloredButton(panel.colorRec1, panel.color1);
+            panel.color2ButtonPressed = coloredButton(panel.colorRec2, panel.color2);
+            panel.color3ButtonPressed = coloredButton(panel.colorRec3, panel.color3);
+            GuiLabel(panel.getImageInstructionsRec, panel.getImageInstructions);
+            GuiLabel(panel.colorPickInstructionsRec, "To replace a palette color, select a color below, then pick one from\n\nthe image");
+        
         EndDrawing();
     }
     
@@ -102,22 +115,50 @@ int main() {
     return 0;
 }
 
-//maybe unload the past image and upload the current one
-void uploadImage(DisplayedImage& img) {
-    if (!IsImageValid(img.image)) {
-        strcpy(getImageInstructions, "Image failed to load");
-        return;
+void uploadImage(DisplayedImage& img, SelectionPanel& panel) {
+    img.image = LoadImage(panel.filePath);
+    
+    if (IsImageValid(img.image)) {
+        panel.paletteLoaded = false;
+
+        //resize image to fit
+        float scale = static_cast<float>(displayPanelWidth) / static_cast<float>(img.image.width);
+
+        if (img.image.height * scale > displayPanelHeight) {
+            scale = static_cast<float>(displayPanelHeight) / static_cast<float>(img.image.height);
+        }
+
+        ImageResize(&img.image, static_cast<int>(img.image.width * scale), static_cast<int>(img.image.height * scale));
+        img.texture = LoadTextureFromImage(img.image);
+        img.rectangle = {(960.0f - img.image.width) / 2.0f, (1080.0f - img.image.height) / 2.0f, static_cast<float>(img.image.width), static_cast<float>(img.image.height)};
+    } else {
+        strcpy(panel.getImageInstructions, "Image failed to load");
     }
+}
 
-    float scale = static_cast<float>(displayPanelWidth) / static_cast<float>(img.image.width);
+void updateImageInstructions(DisplayedImage& img, SelectionPanel& panel) {
+    if (IsFileNameValid(panel.fileNameInput)) {
+        if (IsFileExtension(panel.fileNameInput, ".png")
+        || IsFileExtension(panel.fileNameInput, ".jpg")
+        || IsFileExtension(panel.fileNameInput, ".jpeg")) { //if extension is valid
+            strcpy(panel.fileName, panel.fileNameInput);
 
-    if (img.image.height * scale > displayPanelHeight) {
-        scale = static_cast<float>(displayPanelHeight) / static_cast<float>(img.image.height);
+            strcpy(panel.filePath, "assets/");
+            strcat(panel.filePath, panel.fileName);
+
+            if (FileExists(panel.filePath)) {
+                strcpy(panel.getImageInstructions, "Type the file name of your image (including png or jpg/jpeg\n\nextension) to retrieve it");
+            } else {
+                strcpy(panel.getImageInstructions, "There is no file with the name you inputted");
+            }
+
+        } else { //if extension is not valid
+            strcpy(panel.getImageInstructions, "Choose a file with a proper extension (png or jpg/jpeg)");
+        }
+        
+    } else { //if extension is not valid
+        strcpy(panel.getImageInstructions, "Choose a file with a proper extension (png or jpg/jpeg)");
     }
-
-    ImageResize(&img.image, static_cast<int>(img.image.width * scale), static_cast<int>(img.image.height * scale));
-    img.texture = LoadTextureFromImage(img.image);
-    img.rectangle = {(960.0f - img.image.width) / 2.0f, (1080.0f - img.image.height) / 2.0f, static_cast<float>(img.image.width), static_cast<float>(img.image.height)};
 }
 
 void getTopColors(DisplayedImage& img, SelectionPanel& panel) {
@@ -169,7 +210,9 @@ void getTopColors(DisplayedImage& img, SelectionPanel& panel) {
 }
 
 void changeTopColors(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
-    panel.pixelColor = GetImageColor(img.image, (mouse.position.x - img.rectangle.x), (mouse.position.y - img.rectangle.y));
+    if (CheckCollisionPointRec(mouse.position, img.rectangle)) {
+        panel.pixelColor = GetImageColor(img.image, (mouse.position.x - img.rectangle.x), (mouse.position.y - img.rectangle.y));
+    }
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !ColorIsEqual(panel.pixelColor, BLANK)) {
         switch(mouse.selectedRec) {
@@ -187,11 +230,13 @@ void changeTopColors(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) 
 
             default: break;
         }
+        mouse.selectedRec = 0;
     }
 }
 
 //make this work
-void cropImage(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
+/*
+    void cropImage(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
     if (CheckCollisionPointRec(mouse.position, img.rectangle)) {
                 if (cropping == false) {
                     
@@ -234,24 +279,6 @@ void cropImage(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
                 mouse.croppedRec = {};
                 cropConfirmation.noPressed = false;
             }
-
-            //Draw Image
-            DrawTextureV(img.texture, {img.rectangle.x, img.rectangle.y}, WHITE);
-            if (cropping) {
-                DrawRectangleRec(mouse.croppedRec, {0, 0, 255, 65});
-            }
-
-            //Draw Selection UI
-            GuiPanel(panel.rectangle, NULL);
-            getImageButtonPressed = GuiButton(panel.getImageButtonRec, "GET IMAGE");
-            reloadPaletteButtonPressed = GuiButton(panel.reloadPaletteButtonRec, "RELOAD PALETTE");
-            cropImageButtonPressed = GuiButton(panel.cropImageButtonRec, "CROP IMAGE");
-            GuiTextBox(panel.imagePathRec, fileNameInput, 128, true);
-            color1ButtonPressed = coloredButton(panel.colorRec1, panel.color1);
-            color2ButtonPressed = coloredButton(panel.colorRec2, panel.color2);
-            color3ButtonPressed = coloredButton(panel.colorRec3, panel.color3);
-            GuiLabel(panel.getImageInstructionsRec, getImageInstructions);
-            GuiLabel(panel.colorPickInstructionsRec, "To replace a palette color, select a color below, then pick one from\n\nthe image");
             
             if (!cropConfirmation.windowClosed) {
                 cropConfirmation.windowClosed = GuiWindowBox(cropConfirmation.windowRec, NULL);
@@ -260,30 +287,7 @@ void cropImage(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
                 cropConfirmation.noPressed = GuiButton(cropConfirmation.noRec, "NO");
             }
 }
-
-//keep this updating instructions only
-void updateImageInstructions() {
-    if (GetFileExtension(fileNameInput) != nullptr) {
-        strcpy(fileExtension, GetFileExtension(fileNameInput));
-
-        if (strcmp(fileExtension, ".png") || strcmp(fileExtension, ".jpg") || strcmp(fileExtension, ".jpeg")) { 
-            strcpy(fileName, "assets/");
-            strcat(fileName, fileNameInput);
-            if (FileExists(fileName)) {
-                strcpy(fileString, fileName);
-                strcpy(getImageInstructions, "Type the file name of your image (including png or jpg/jpeg\n\nextension) to retrieve it");
-                img.image = LoadImage(fileString);
-                paletteLoaded = false;
-            } else {
-                strcpy(getImageInstructions, "There is no file with the name you inputted");
-            }
-        } else {
-            strcpy(getImageInstructions, "Choose a file with a proper extension (png or jpg/jpeg)");
-        }
-    } else {
-        strcpy(getImageInstructions, "Choose a file with a proper extension (png or jpg/jpeg)");
-    }
-}
+*/
 
 //Custom variant of raygui GuiButton()
 bool coloredButton(Rectangle bounds, Color color) {

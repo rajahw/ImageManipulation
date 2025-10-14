@@ -7,18 +7,22 @@
 #include <unordered_map>
 #include <queue>
 #include <cstring>
+#include <cstdint>
 
-inline unsigned int displayPanelWidth = 960;
-inline unsigned int displayPanelHeight = 1080;
-inline int blank = ColorToInt(BLANK);
+inline uint16_t displayPanelWidth = 960;
+inline uint16_t displayPanelHeight = 1080;
 
 class SelectionPanel {
     public:
+        char getImageInstructions[128];
+        char fileNameInput[128];
+        char fileName[128];
+        char filePath[128];
         Rectangle rectangle;
         Rectangle colorRec1;
         Rectangle colorRec2;
         Rectangle colorRec3;
-        Rectangle imagePathRec;
+        Rectangle imageInputRec;
         Rectangle getImageButtonRec;
         Rectangle getImageInstructionsRec;
         Rectangle colorPickInstructionsRec;
@@ -36,13 +40,26 @@ class SelectionPanel {
         int color1Freq;
         int color2Freq;
         int color3Freq;
+        bool color1ButtonPressed;
+        bool color2ButtonPressed;
+        bool color3ButtonPressed;
+        bool getImageButtonPressed;
+        bool reloadPaletteButtonPressed;
+        bool cropImageButtonPressed;
+        bool paletteLoaded;
+        bool croppingImage;
 
         inline SelectionPanel() {
+            strcpy(getImageInstructions, "Type the file name of your image (including png or jpg/jpeg extension)\n\nto retrieve it");
+            strcpy(fileNameInput, "");
+            strcpy(fileName, "");
+            strcpy(filePath, "assets/env.png");
+
             rectangle = {960.0f, 0.0f, 960.0f, 1080.0f};
             colorRec1 = {984.0f, 744.0f, 288.0f, 280.0f};
             colorRec2 = {1296.0f, 744.0f, 288.0f, 280.0f};
             colorRec3 = {1608.0f, 744.0f, 288.0f, 280.0f};
-            imagePathRec = {984.0f, 144.0f, 912.0f, 96.0f};
+            imageInputRec = {984.0f, 144.0f, 912.0f, 96.0f};
             getImageButtonRec = {984.0f, 264.0f, 912.0f, 96.0f};
             getImageInstructionsRec = {984.0f, 24.0f, 912.0f, 96.0f};
             colorPickInstructionsRec = {984.0f, 624.0f, 912.0f, 96.0f};
@@ -55,6 +72,15 @@ class SelectionPanel {
             color1 = BLACK;
             color2 = BLACK;
             color3 = BLACK;
+
+            color1ButtonPressed = false;
+            color2ButtonPressed = false;
+            color3ButtonPressed = false;
+            getImageButtonPressed = false;
+            reloadPaletteButtonPressed = false;
+            cropImageButtonPressed = false;
+            paletteLoaded = false;
+            croppingImage = false;
         }
 };
 
