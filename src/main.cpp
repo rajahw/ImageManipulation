@@ -2,8 +2,10 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-void displayResize(DisplayedImage&);
+void resizeImageToDisplay(DisplayedImage&);
 void getTopColors(DisplayedImage&, SelectionPanel&);
+void cropImage(DisplayedImage&);
+void updateImageInstructions(DisplayedImage&);
 bool coloredButton(Rectangle, Color);
 
 int main() {
@@ -42,16 +44,8 @@ int main() {
 
             //Update
             if (!paletteLoaded) {
-                if (IsImageValid(img.image)) {
-                    displayResize(img);
-                    img.texture = LoadTextureFromImage(img.image);
-                    img.rectangle = {(960.0f - img.image.width) / 2.0f, (1080.0f - img.image.height) / 2.0f, static_cast<float>(img.image.width), static_cast<float>(img.image.height)};
-                    getTopColors(img, panel);
-                    paletteLoaded = true;
-                } else {
-                    strcpy(getImageInstructions, "Image failed to load");
-                    paletteLoaded = true;
-                }
+                getTopColors(img, panel);
+                paletteLoaded = true;
             }
 
             if (!statsPrinted) {
@@ -63,27 +57,7 @@ int main() {
 
             if (getImageButtonPressed) {
                 std::cout << "Get Image Button Pressed" << '\n';
-                
-                if (GetFileExtension(fileNameInput) != nullptr) {
-                    strcpy(fileExtension, GetFileExtension(fileNameInput));
-
-                    if (strcmp(fileExtension, ".png") || strcmp(fileExtension, ".jpg") || strcmp(fileExtension, ".jpeg")) { 
-                        strcpy(fileName, "assets/");
-                        strcat(fileName, fileNameInput);
-                        if (FileExists(fileName)) {
-                            strcpy(fileString, fileName);
-                            strcpy(getImageInstructions, "Type the file name of your image (including png or jpg/jpeg\n\nextension) to retrieve it");
-                            img.image = LoadImage(fileString);
-                            paletteLoaded = false;
-                        } else {
-                            strcpy(getImageInstructions, "There is no file with the name you inputted");
-                        }
-                    } else {
-                        strcpy(getImageInstructions, "Choose a file with a proper extension (png or jpg/jpeg)");
-                    }
-                } else {
-                    strcpy(getImageInstructions, "Choose a file with a proper extension (png or jpg/jpeg)");
-                }
+                //uploadImage
             }
 
             if (reloadPaletteButtonPressed) {
@@ -113,31 +87,117 @@ int main() {
                 std::cout << "Color 3 Button Pressed" << '\n';
                 mouse.selectedRec = 3;
             }
+            
+            if (!cropping) {
+                changeTopColors(img, panel, mouse);
+            }
+        EndDrawing();
+    }
+    
+    UnloadImage(img.image);
+    UnloadTexture(img.texture);
 
-            if (CheckCollisionPointRec(mouse.position, img.rectangle)) {
-                if (!cropping) {
-                    panel.pixelColor = GetImageColor(img.image, (mouse.position.x - img.rectangle.x), (mouse.position.y - img.rectangle.y));
+    CloseWindow();
 
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !ColorIsEqual(panel.pixelColor, BLANK)) {
-                        switch (mouse.selectedRec) {
-                            case 1:
-                                panel.color1 = panel.pixelColor;
-                            break;
+    return 0;
+}
 
-                            case 2:
-                                panel.color2 = panel.pixelColor;
-                            break;
+//maybe unload the past image and upload the current one
+void uploadImage(DisplayedImage& img) {
+    if (!IsImageValid(img.image)) {
+        strcpy(getImageInstructions, "Image failed to load");
+        return;
+    }
 
-                            case 3:
-                                panel.color3 = panel.pixelColor;
-                            break;
+    float scale = static_cast<float>(displayPanelWidth) / static_cast<float>(img.image.width);
 
-                            default: break;
-                        }
-                    }
+    if (img.image.height * scale > displayPanelHeight) {
+        scale = static_cast<float>(displayPanelHeight) / static_cast<float>(img.image.height);
+    }
+
+    ImageResize(&img.image, static_cast<int>(img.image.width * scale), static_cast<int>(img.image.height * scale));
+    img.texture = LoadTextureFromImage(img.image);
+    img.rectangle = {(960.0f - img.image.width) / 2.0f, (1080.0f - img.image.height) / 2.0f, static_cast<float>(img.image.width), static_cast<float>(img.image.height)};
+}
+
+void getTopColors(DisplayedImage& img, SelectionPanel& panel) {
+    Color pixelColor;
+    int pixelInt;
+    std::unordered_map<int, int> colors;
+    std::priority_queue<std::pair<int, int>> topColors;
+
+    for (int i = 0; i < img.image.width; ++i) {
+        for (int j = 0; j < img.image.height; ++j) {
+            pixelColor = GetImageColor(img.image, i, j);
+            
+            if (pixelColor.a != 0) {
+                pixelInt = ColorToInt(pixelColor);
+
+                auto iter = std::find_if(colors.begin(), colors.end(), [pixelColor](const std::pair<const int, int>& comparedPair) {
+                    Color comparedColor = GetColor(comparedPair.first);
+                    return (std::abs(comparedColor.r - pixelColor.r) <= 16 && std::abs(comparedColor.g - pixelColor.g) <= 16 && std::abs(comparedColor.b - pixelColor.b) <= 16);
+                });
+
+                if (iter != colors.end()) {
+                    ++iter->second;
                 } else {
-                    //if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && cropConfirmation.windowClosed) {
-                        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+                    ++colors[pixelInt];
+                }
+            }
+        }
+    }
+
+    for (auto pair : colors) {
+        topColors.push(std::make_pair(pair.second, pair.first));
+    }
+    
+    panel.color1 = GetColor(topColors.top().second);
+    panel.color1.a = 255;
+    panel.color1Freq = topColors.top().first;
+    topColors.pop();
+    panel.color2 = GetColor(topColors.top().second);
+    panel.color2.a = 255;
+    panel.color2Freq = topColors.top().first;
+    topColors.pop();
+    panel.color3 = GetColor(topColors.top().second);
+    panel.color3.a = 255;
+    panel.color3Freq = topColors.top().first;
+
+    panel.oldColor1 = panel.color1;
+    panel.oldColor2 = panel.color2;
+    panel.oldColor3 = panel.color3;
+}
+
+void changeTopColors(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
+    panel.pixelColor = GetImageColor(img.image, (mouse.position.x - img.rectangle.x), (mouse.position.y - img.rectangle.y));
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !ColorIsEqual(panel.pixelColor, BLANK)) {
+        switch(mouse.selectedRec) {
+            case 1:
+                panel.color1 = panel.pixelColor;
+            break;
+
+            case 2:
+                panel.color2 = panel.pixelColor;
+            break;
+
+            case 3:
+                panel.color3 = panel.pixelColor;
+            break;
+
+            default: break;
+        }
+    }
+}
+
+//make this work
+void cropImage(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
+    if (CheckCollisionPointRec(mouse.position, img.rectangle)) {
+                if (cropping == false) {
+                    
+                } else {
+                    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && cropConfirmation.windowClosed == true) {
+                    //if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
                         if (!mouse.initialPointSelected) {
                             mouse.initialCropPoint = mouse.position;
                             mouse.initialPointSelected = true;
@@ -199,76 +259,30 @@ int main() {
                 cropConfirmation.yesPressed = GuiButton(cropConfirmation.yesRec, "YES");
                 cropConfirmation.noPressed = GuiButton(cropConfirmation.noRec, "NO");
             }
-            
-        EndDrawing();
-    }
-    
-    UnloadImage(img.image);
-    UnloadTexture(img.texture);
-
-    CloseWindow();
-
-    return 0;
 }
 
-void displayResize(DisplayedImage& img) {
-    if (img.image.data == nullptr || img.image.width == 0 || img.image.height == 0) return;
+//keep this updating instructions only
+void updateImageInstructions() {
+    if (GetFileExtension(fileNameInput) != nullptr) {
+        strcpy(fileExtension, GetFileExtension(fileNameInput));
 
-    float scale = static_cast<float>(displayPanelWidth) / static_cast<float>(img.image.width);
-
-    if (img.image.height * scale > displayPanelHeight) {
-        scale = static_cast<float>(displayPanelHeight) / static_cast<float>(img.image.height);
-    }
-
-    ImageResize(&img.image, static_cast<int>(img.image.width * scale), static_cast<int>(img.image.height * scale));
-}
-
-void getTopColors(DisplayedImage& img, SelectionPanel& panel) {
-    Color pixelColor;
-    int pixelInt;
-    std::unordered_map<int, int> colors;
-    std::priority_queue<std::pair<int, int>> topColors;
-
-    for (int i = 0; i < img.image.width; ++i) {
-        for (int j = 0; j < img.image.height; ++j) {
-            pixelColor = GetImageColor(img.image, i, j);
-            
-            if (pixelColor.a != 0) {
-                pixelInt = ColorToInt(pixelColor);
-
-                auto iter = std::find_if(colors.begin(), colors.end(), [pixelColor](const std::pair<const int, int>& comparedPair) {
-                    Color comparedColor = GetColor(comparedPair.first);
-                    return (std::abs(comparedColor.r - pixelColor.r) <= 16 && std::abs(comparedColor.g - pixelColor.g) <= 16 && std::abs(comparedColor.b - pixelColor.b) <= 16);
-                });
-
-                if (iter != colors.end()) {
-                    iter->second++;
-                } else {
-                    colors[pixelInt]++;
-                }
+        if (strcmp(fileExtension, ".png") || strcmp(fileExtension, ".jpg") || strcmp(fileExtension, ".jpeg")) { 
+            strcpy(fileName, "assets/");
+            strcat(fileName, fileNameInput);
+            if (FileExists(fileName)) {
+                strcpy(fileString, fileName);
+                strcpy(getImageInstructions, "Type the file name of your image (including png or jpg/jpeg\n\nextension) to retrieve it");
+                img.image = LoadImage(fileString);
+                paletteLoaded = false;
+            } else {
+                strcpy(getImageInstructions, "There is no file with the name you inputted");
             }
+        } else {
+            strcpy(getImageInstructions, "Choose a file with a proper extension (png or jpg/jpeg)");
         }
+    } else {
+        strcpy(getImageInstructions, "Choose a file with a proper extension (png or jpg/jpeg)");
     }
-
-    for (auto pair : colors) {
-        topColors.push(std::make_pair(pair.second, pair.first));
-    }
-    
-    panel.color1 = GetColor(topColors.top().second);
-    panel.color1.a = 255;
-    panel.color1Freq = topColors.top().first;
-    topColors.pop();
-    panel.color2 = GetColor(topColors.top().second);
-    panel.color2.a = 255;
-    panel.color2Freq = topColors.top().first;
-    topColors.pop();
-    panel.color3 = GetColor(topColors.top().second);
-    panel.color3.a = 255;
-    panel.color3Freq = topColors.top().first;
-
-    panel.oldColor1 = panel.color1;
-    panel.oldColor2 = panel.color2;
-    panel.oldColor3 = panel.color3;
 }
 
 //Custom variant of raygui GuiButton()
