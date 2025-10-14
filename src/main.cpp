@@ -124,7 +124,7 @@ void uploadImage(DisplayedImage& img, SelectionPanel& panel) {
         img.texture = LoadTextureFromImage(img.image);
         img.rectangle = {(960.0f - img.image.width) / 2.0f, (1080.0f - img.image.height) / 2.0f, static_cast<float>(img.image.width), static_cast<float>(img.image.height)};
     } else {
-        strcpy(panel.getImageInstructions, "Image failed to load (It may not exist)");
+        strcpy(panel.getImageInstructions, "Image failed to load (Invalid or nonexistent)");
     }
 }
 
