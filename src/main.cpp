@@ -17,7 +17,6 @@ int main() {
     DisplayedImage img;
     Cursor mouse;
     YesNoPopup cropConfirmation;
-    bool statsPrinted = false;
 
     GuiLoadStyle("assets/style_dark.rgs");
     GuiSetStyle(DEFAULT, TEXT_SIZE, 32);
@@ -36,13 +35,6 @@ int main() {
             if (!panel.paletteLoaded) {
                 getTopColors(img, panel);
                 panel.paletteLoaded = true;
-            }
-
-            if (!statsPrinted) {
-                std::cout << 1 << ": " << panel.color1Freq << '\n';
-                std::cout << 2 << ": " << panel.color2Freq << '\n';
-                std::cout << 3 << ": " << panel.color3Freq << '\n';
-                statsPrinted = true;
             }
 
             if (panel.getImageButtonPressed) {
@@ -132,7 +124,7 @@ void uploadImage(DisplayedImage& img, SelectionPanel& panel) {
         img.texture = LoadTextureFromImage(img.image);
         img.rectangle = {(960.0f - img.image.width) / 2.0f, (1080.0f - img.image.height) / 2.0f, static_cast<float>(img.image.width), static_cast<float>(img.image.height)};
     } else {
-        strcpy(panel.getImageInstructions, "Image failed to load");
+        strcpy(panel.getImageInstructions, "Image failed to load (It may not exist)");
     }
 }
 
@@ -148,8 +140,6 @@ void updateImageInstructions(DisplayedImage& img, SelectionPanel& panel) {
 
             if (FileExists(panel.filePath)) {
                 strcpy(panel.getImageInstructions, "Type the file name of your image (including png or jpg/jpeg\n\nextension) to retrieve it");
-            } else {
-                strcpy(panel.getImageInstructions, "There is no file with the name you inputted");
             }
 
         } else { //if extension is not valid
