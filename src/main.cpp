@@ -16,7 +16,6 @@ int main() {
     SelectionPanel panel;
     DisplayedImage img;
     Cursor mouse;
-    YesNoPopup cropConfirmation;
 
     GuiLoadStyle("assets/style_dark.rgs");
     GuiSetStyle(DEFAULT, TEXT_SIZE, 32);
@@ -78,7 +77,7 @@ int main() {
             //Draw Image
             DrawTextureV(img.texture, {img.rectangle.x, img.rectangle.y}, WHITE);
 
-            /* Make this work so that the croppedRec doesn't persist
+            /* Make this work so that the croppedRec doesn't persist after confirmation
             if (cropping) {
                 DrawRectangleRec(mouse.croppedRec, {0, 0, 255, 65});
             }
@@ -88,13 +87,18 @@ int main() {
             GuiPanel(panel.rectangle, NULL);
             panel.getImageButtonPressed = GuiButton(panel.getImageButtonRec, "GET IMAGE");
             panel.reloadPaletteButtonPressed = GuiButton(panel.reloadPaletteButtonRec, "RELOAD PALETTE");
-            panel.cropImageButtonPressed = GuiButton(panel.cropImageButtonRec, "CROP IMAGE");
             GuiTextBox(panel.imageInputRec, panel.fileNameInput, 128, true);
             panel.color1ButtonPressed = coloredButton(panel.colorRec1, panel.color1);
             panel.color2ButtonPressed = coloredButton(panel.colorRec2, panel.color2);
             panel.color3ButtonPressed = coloredButton(panel.colorRec3, panel.color3);
             GuiLabel(panel.getImageInstructionsRec, panel.getImageInstructions);
             GuiLabel(panel.colorPickInstructionsRec, "To replace a palette color, select a color below, then pick one from\n\nthe image");
+            if (!panel.croppingImage) {
+                panel.cropImageButtonPressed = GuiButton(panel.cropImageButtonRec, "CROP IMAGE");
+            } else {
+                panel.confirmCropButtonPressed = GuiButton(panel.confirmCropButtonRec, "CONFIRM CROP");
+                panel.discardCropButtonPressed = GuiButton(panel.discardCropButtonRec, "DISCARD CROP");
+            }
         
         EndDrawing();
     }
@@ -228,19 +232,15 @@ void changeTopColors(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) 
 /*
     void cropImage(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
     if (CheckCollisionPointRec(mouse.position, img.rectangle)) {
-                if (cropping == false) {
-                    
-                } else {
-                    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && cropConfirmation.windowClosed == true) {
-                    //if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-                        if (!mouse.initialPointSelected) {
-                            mouse.initialCropPoint = mouse.position;
-                            mouse.initialPointSelected = true;
-                        }
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            if (!mouse.initialPointSelected) {
+                mouse.initialCropPoint = mouse.position;
+                mouse.initialPointSelected = true;
+            }
 
-                        mouse.cropPoint = mouse.position;
-                        mouse.croppedRec = {mouse.initialCropPoint.x, mouse.initialCropPoint.y, mouse.cropPoint.x - mouse.initialCropPoint.x, mouse.cropPoint.y - mouse.initialCropPoint.y};
-                    }
+                mouse.cropPoint = mouse.position;
+                mouse.croppedRec = {mouse.initialCropPoint.x, mouse.initialCropPoint.y, mouse.cropPoint.x - mouse.initialCropPoint.x, mouse.cropPoint.y - mouse.initialCropPoint.y};
+            }
 
                     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
                         cropConfirmation.windowClosed = false;

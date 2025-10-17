@@ -28,7 +28,8 @@ class SelectionPanel {
         Rectangle colorPickInstructionsRec;
         Rectangle reloadPaletteButtonRec;
         Rectangle cropImageButtonRec;
-        Rectangle cropConfirmationRec;
+        Rectangle confirmCropButtonRec;
+        Rectangle discardCropButtonRec;
         Vector2 circlePosition;
         Color pixelColor;
         Color color1;
@@ -46,6 +47,8 @@ class SelectionPanel {
         bool getImageButtonPressed;
         bool reloadPaletteButtonPressed;
         bool cropImageButtonPressed;
+        bool confirmCropButtonPressed;
+        bool discardCropButtonPressed;
         bool paletteLoaded;
         bool croppingImage;
 
@@ -65,8 +68,8 @@ class SelectionPanel {
             colorPickInstructionsRec = {984.0f, 624.0f, 912.0f, 96.0f};
             reloadPaletteButtonRec = {984.0f, 384.0f, 912.0f, 96.0f};
             cropImageButtonRec = {984.0f, 504.0f, 912.0f, 96.0f};
-            cropConfirmationRec = {672.0f, 344.0f, 600.0f, 304.0f};
-            circlePosition = {rectangle.x + (rectangle.width / 2.0f), rectangle.height / 2.0f};
+            confirmCropButtonRec = {984.0f, 504.0f, 448.0f, 96.0f};
+            discardCropButtonRec = {1448.0f, 504.0f, 448.0f, 96.0f};
 
             pixelColor = BLACK;
             color1 = BLACK;
@@ -79,6 +82,8 @@ class SelectionPanel {
             getImageButtonPressed = false;
             reloadPaletteButtonPressed = false;
             cropImageButtonPressed = false;
+            confirmCropButtonPressed = false;
+            discardCropButtonPressed = false;
             paletteLoaded = false;
             croppingImage = false;
         }
@@ -109,25 +114,4 @@ class Cursor {
             cropPoint = {};
             initialPointSelected = false;
         }
-};
-
-class YesNoPopup {
-    public:
-        Rectangle windowRec;
-        Rectangle textRec;
-        Rectangle yesRec;
-        Rectangle noRec;
-        bool windowClosed;
-        bool yesPressed;
-        bool noPressed;
-
-    inline YesNoPopup() {
-        windowRec = {248.0f, 352.0f, 552.0f, 328.0f};
-        textRec = {376.0f, 432.0f, 304.0f, 48.0f};
-        yesRec = {296.0f, 528.0f, 208.0f, 96.0f};
-        noRec = {528.0f, 528.0f, 208.0f, 96.0f};
-        windowClosed = true;
-        yesPressed = false;
-        noPressed = false;
-    }
 };
