@@ -2,7 +2,7 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-void uploadImage(DisplayedImage&, SelectionPanel&);
+void loadImage(DisplayedImage&, SelectionPanel&);
 void updateImageInstructions(DisplayedImage&, SelectionPanel&);
 void getTopColors(DisplayedImage&, SelectionPanel&);
 void changeTopColors(DisplayedImage&, SelectionPanel&, Cursor&);
@@ -22,7 +22,7 @@ int main() {
     GuiLoadStyle("assets/style_dark.rgs");
     GuiSetStyle(DEFAULT, TEXT_SIZE, 32);
 
-    uploadImage(img, panel);
+    loadImage(img, panel);
 
     while (!WindowShouldClose()) {
         BeginDrawing();
@@ -45,7 +45,7 @@ int main() {
             if (panel.getImageButtonPressed) {
                 std::cout << "Get Image Button Pressed" << '\n';
                 updateImageInstructions(img, panel);
-                uploadImage(img, panel);
+                loadImage(img, panel);
             }
 
             if (panel.reloadPaletteButtonPressed) {
@@ -131,8 +131,8 @@ int main() {
     return 0;
 }
 
-void uploadImage(DisplayedImage& img, SelectionPanel& panel) {
-    img.image = LoadImage(panel.filePath);
+void loadImage(DisplayedImage& img, SelectionPanel& panel) {
+    if (!panel.croppingImage) {img.image = LoadImage(panel.filePath);}
     
     if (IsImageValid(img.image)) {
         panel.paletteLoaded = false;
@@ -176,15 +176,7 @@ void updateImageInstructions(DisplayedImage& img, SelectionPanel& panel) {
 }
 
 void getTopColors(DisplayedImage& img, SelectionPanel& panel) {
-    if (!IsImageValid(img.image) || img.image.width == 0 || img.image.height == 0) {
-        panel.color1 = panel.color2 = panel.color3 = BLACK;
-        panel.color1.a = panel.color2.a = panel.color3.a = 255;
-        panel.color1Freq = panel.color2Freq = panel.color3Freq = 0;
-        panel.oldColor1 = panel.color1;
-        panel.oldColor2 = panel.color2;
-        panel.oldColor3 = panel.color3;
-        return;
-    }
+    if (!IsImageValid(img.image) || img.image.width == 0 || img.image.height == 0) {return;}
     
     Color pixelColor;
     int pixelInt;
@@ -284,8 +276,10 @@ void confirmCrop(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
     ImageCrop(&img.image, {mouse.croppedRec.x - img.rectangle.x, //x
                             mouse.croppedRec.y - img.rectangle.y, //y
                             mouse.croppedRec.width, //width
-                            mouse.croppedRec.height}
+                            mouse.croppedRec.height} //height
     );
+
+    loadImage(img, panel);
     
     panel.croppingImage = false;
     mouse.croppedRec = {};
