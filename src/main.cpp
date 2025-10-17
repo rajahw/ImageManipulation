@@ -6,7 +6,7 @@ void uploadImage(DisplayedImage&, SelectionPanel&);
 void updateImageInstructions(DisplayedImage&, SelectionPanel&);
 void getTopColors(DisplayedImage&, SelectionPanel&);
 void changeTopColors(DisplayedImage&, SelectionPanel&, Cursor&);
-//void cropImage(DisplayedImage&);
+void cropImage(DisplayedImage&, SelectionPanel&, Cursor&);
 bool coloredButton(Rectangle, Color);
 
 int main() {
@@ -36,6 +36,10 @@ int main() {
                 panel.paletteLoaded = true;
             }
 
+            if (panel.croppingImage) {
+                cropImage(img, panel, mouse);
+            }
+
             if (panel.getImageButtonPressed) {
                 std::cout << "Get Image Button Pressed" << '\n';
                 updateImageInstructions(img, panel);
@@ -52,6 +56,8 @@ int main() {
 
             if (panel.cropImageButtonPressed) {
                 std::cout << "Crop Image Button Pressed" << '\n';
+                panel.cropImageButtonPressed = false;
+                //manually switch state since this button isn't always drawn
                 panel.croppingImage = true;
             }
 
@@ -69,6 +75,18 @@ int main() {
                 std::cout << "Color 3 Button Pressed" << '\n';
                 mouse.selectedRec = 3;
             }
+
+            if (panel.confirmCropButtonPressed) {
+                std::cout << "Confirm Crop Button Pressed" << '\n';
+                panel.confirmCropButtonPressed = false;
+                //manually switch state since this button isn't always drawn
+            }
+
+            if (panel.discardCropButtonPressed) {
+                std::cout << "Discard Crop Button Pressed" << '\n';
+                panel.discardCropButtonPressed = false;
+                //manually switch state since this button isn't always drawn
+            }
             
             if ((mouse.selectedRec == 1 || mouse.selectedRec == 2 || mouse.selectedRec == 3)) {
                 changeTopColors(img, panel, mouse);
@@ -77,11 +95,9 @@ int main() {
             //Draw Image
             DrawTextureV(img.texture, {img.rectangle.x, img.rectangle.y}, WHITE);
 
-            /* Make this work so that the croppedRec doesn't persist after confirmation
-            if (cropping) {
-                DrawRectangleRec(mouse.croppedRec, {0, 0, 255, 65});
+            if (panel.croppingImage) {
+                DrawRectangleRec(mouse.croppedRec, {255, 255, 255, 65});
             }
-            */
 
             //Draw Selection UI
             GuiPanel(panel.rectangle, NULL);
@@ -229,8 +245,36 @@ void changeTopColors(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) 
 }
 
 //make this work
-/*
-    void cropImage(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
+void cropImage(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
+    if (CheckCollisionPointRec(mouse.position, img.rectangle)) {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            if (!mouse.initialPointSelected) { //get initial crop point
+                mouse.initialCropPoint = mouse.position;
+                mouse.initialPointSelected = true;
+            }
+
+            mouse.cropPoint = mouse.position;
+            mouse.croppedRec = {mouse.initialCropPoint.x, mouse.initialCropPoint.y,
+                                mouse.cropPoint.x - mouse.initialCropPoint.x,
+                                mouse.cropPoint.y - mouse.initialCropPoint.y};
+        }
+
+        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            mouse.initialPointSelected = false; //reset initial crop point
+        }
+    }
+}
+
+void confirmCrop() {
+
+}
+
+void discardCrop() {
+    
+}
+
+
+    /*
     if (CheckCollisionPointRec(mouse.position, img.rectangle)) {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             if (!mouse.initialPointSelected) {
@@ -242,9 +286,7 @@ void changeTopColors(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) 
                 mouse.croppedRec = {mouse.initialCropPoint.x, mouse.initialCropPoint.y, mouse.cropPoint.x - mouse.initialCropPoint.x, mouse.cropPoint.y - mouse.initialCropPoint.y};
             }
 
-                    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-                        cropConfirmation.windowClosed = false;
-                    }
+                    
                 }
             }
 
@@ -276,8 +318,7 @@ void changeTopColors(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) 
                 cropConfirmation.yesPressed = GuiButton(cropConfirmation.yesRec, "YES");
                 cropConfirmation.noPressed = GuiButton(cropConfirmation.noRec, "NO");
             }
-}
-*/
+                */
 
 //Custom variant of raygui GuiButton()
 bool coloredButton(Rectangle bounds, Color color) {
