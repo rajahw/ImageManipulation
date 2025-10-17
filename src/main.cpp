@@ -6,7 +6,9 @@ void uploadImage(DisplayedImage&, SelectionPanel&);
 void updateImageInstructions(DisplayedImage&, SelectionPanel&);
 void getTopColors(DisplayedImage&, SelectionPanel&);
 void changeTopColors(DisplayedImage&, SelectionPanel&, Cursor&);
-void cropImage(DisplayedImage&, SelectionPanel&, Cursor&);
+void getCropRec(DisplayedImage&, SelectionPanel&, Cursor&);
+void confirmCrop(DisplayedImage&, SelectionPanel&, Cursor&);
+void discardCrop(DisplayedImage&, SelectionPanel&, Cursor&);
 bool coloredButton(Rectangle, Color);
 
 int main() {
@@ -37,7 +39,7 @@ int main() {
             }
 
             if (panel.croppingImage) {
-                cropImage(img, panel, mouse);
+                getCropRec(img, panel, mouse);
             }
 
             if (panel.getImageButtonPressed) {
@@ -78,12 +80,14 @@ int main() {
 
             if (panel.confirmCropButtonPressed) {
                 std::cout << "Confirm Crop Button Pressed" << '\n';
+                confirmCrop(img, panel, mouse);
                 panel.confirmCropButtonPressed = false;
                 //manually switch state since this button isn't always drawn
             }
 
             if (panel.discardCropButtonPressed) {
                 std::cout << "Discard Crop Button Pressed" << '\n';
+                discardCrop(img, panel, mouse);
                 panel.discardCropButtonPressed = false;
                 //manually switch state since this button isn't always drawn
             }
@@ -172,6 +176,16 @@ void updateImageInstructions(DisplayedImage& img, SelectionPanel& panel) {
 }
 
 void getTopColors(DisplayedImage& img, SelectionPanel& panel) {
+    if (!IsImageValid(img.image) || img.image.width == 0 || img.image.height == 0) {
+        panel.color1 = panel.color2 = panel.color3 = BLACK;
+        panel.color1.a = panel.color2.a = panel.color3.a = 255;
+        panel.color1Freq = panel.color2Freq = panel.color3Freq = 0;
+        panel.oldColor1 = panel.color1;
+        panel.oldColor2 = panel.color2;
+        panel.oldColor3 = panel.color3;
+        return;
+    }
+    
     Color pixelColor;
     int pixelInt;
     std::unordered_map<int, int> colors;
@@ -244,8 +258,7 @@ void changeTopColors(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) 
     }
 }
 
-//make this work
-void cropImage(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
+void getCropRec(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
     if (CheckCollisionPointRec(mouse.position, img.rectangle)) {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             if (!mouse.initialPointSelected) { //get initial crop point
@@ -254,9 +267,10 @@ void cropImage(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
             }
 
             mouse.cropPoint = mouse.position;
-            mouse.croppedRec = {mouse.initialCropPoint.x, mouse.initialCropPoint.y,
-                                mouse.cropPoint.x - mouse.initialCropPoint.x,
-                                mouse.cropPoint.y - mouse.initialCropPoint.y};
+            mouse.croppedRec = {mouse.initialCropPoint.x, //x
+                                mouse.initialCropPoint.y, //y
+                                mouse.cropPoint.x - mouse.initialCropPoint.x, //width
+                                mouse.cropPoint.y - mouse.initialCropPoint.y}; //height
         }
 
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
@@ -265,60 +279,28 @@ void cropImage(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
     }
 }
 
-void confirmCrop() {
-
-}
-
-void discardCrop() {
+void confirmCrop(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
+    img.oldImage = ImageCopy(img.image);
+    ImageCrop(&img.image, {mouse.croppedRec.x - img.rectangle.x, //x
+                            mouse.croppedRec.y - img.rectangle.y, //y
+                            mouse.croppedRec.width, //width
+                            mouse.croppedRec.height}
+    );
     
+    panel.croppingImage = false;
+    mouse.croppedRec = {};
+    mouse.initialCropPoint = {};
+    mouse.cropPoint = {};
+    mouse.initialPointSelected = false;
 }
 
-
-    /*
-    if (CheckCollisionPointRec(mouse.position, img.rectangle)) {
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-            if (!mouse.initialPointSelected) {
-                mouse.initialCropPoint = mouse.position;
-                mouse.initialPointSelected = true;
-            }
-
-                mouse.cropPoint = mouse.position;
-                mouse.croppedRec = {mouse.initialCropPoint.x, mouse.initialCropPoint.y, mouse.cropPoint.x - mouse.initialCropPoint.x, mouse.cropPoint.y - mouse.initialCropPoint.y};
-            }
-
-                    
-                }
-            }
-
-            if (cropConfirmation.yesPressed) {
-                //duplicate image, assign the duplicate to oldImage, then crop original
-                //add revert image button
-                img.oldImage = ImageCopy(img.image);
-                ImageCrop(&img.image, {img.rectangle.x + mouse.croppedRec.x,
-                img.rectangle.y + mouse.croppedRec.y,
-                img.rectangle.width + mouse.croppedRec.width,
-                img.rectangle.height + mouse.croppedRec.height});
-                paletteLoaded = false; 
-
-                cropConfirmation.windowClosed = true;
-                cropping = false;
-                mouse.croppedRec = {};
-                cropConfirmation.yesPressed = false;
-            }
-            if (cropConfirmation.noPressed) {
-                cropConfirmation.windowClosed = true;
-                cropping = false;
-                mouse.croppedRec = {};
-                cropConfirmation.noPressed = false;
-            }
-            
-            if (!cropConfirmation.windowClosed) {
-                cropConfirmation.windowClosed = GuiWindowBox(cropConfirmation.windowRec, NULL);
-                GuiLabel(cropConfirmation.textRec, "Crop this image?");
-                cropConfirmation.yesPressed = GuiButton(cropConfirmation.yesRec, "YES");
-                cropConfirmation.noPressed = GuiButton(cropConfirmation.noRec, "NO");
-            }
-                */
+void discardCrop(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
+    panel.croppingImage = false;
+    mouse.croppedRec = {};
+    mouse.initialCropPoint = {};
+    mouse.cropPoint = {};
+    mouse.initialPointSelected = false;
+}
 
 //Custom variant of raygui GuiButton()
 bool coloredButton(Rectangle bounds, Color color) {
