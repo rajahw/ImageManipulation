@@ -9,6 +9,7 @@ void changeTopColors(DisplayedImage&, SelectionPanel&, Cursor&);
 void getCropRec(DisplayedImage&, SelectionPanel&, Cursor&);
 void confirmCrop(DisplayedImage&, SelectionPanel&, Cursor&);
 void discardCrop(DisplayedImage&, SelectionPanel&, Cursor&);
+void revertImage(DisplayedImage&, SelectionPanel&);
 bool coloredButton(Rectangle, Color);
 
 int main() {
@@ -63,6 +64,11 @@ int main() {
                 panel.croppingImage = true;
             }
 
+            if (panel.revertImageButtonPressed) {
+                std::cout << "Revert Image Button Pressed" << '\n';
+                revertImage(img, panel);
+            }
+
             if (panel.color1ButtonPressed) {
                 std::cout << "Color 1 Button Pressed" << '\n';
                 mouse.selectedRec = 1;
@@ -107,6 +113,7 @@ int main() {
             GuiPanel(panel.rectangle, NULL);
             panel.getImageButtonPressed = GuiButton(panel.getImageButtonRec, "GET IMAGE");
             panel.reloadPaletteButtonPressed = GuiButton(panel.reloadPaletteButtonRec, "RELOAD PALETTE");
+            panel.revertImageButtonPressed = GuiButton(panel.revertImageButtonRec, "REVERT IMAGE");
             GuiTextBox(panel.imageInputRec, panel.fileNameInput, 128, true);
             panel.color1ButtonPressed = coloredButton(panel.colorRec1, panel.color1);
             panel.color2ButtonPressed = coloredButton(panel.colorRec2, panel.color2);
@@ -294,6 +301,11 @@ void discardCrop(DisplayedImage& img, SelectionPanel& panel, Cursor& mouse) {
     mouse.initialCropPoint = {};
     mouse.cropPoint = {};
     mouse.initialPointSelected = false;
+}
+
+void revertImage(DisplayedImage& img, SelectionPanel& panel) {
+    img.image = ImageCopy(img.oldImage);
+    loadImage(img, panel);
 }
 
 //Custom variant of raygui GuiButton()

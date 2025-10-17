@@ -30,6 +30,7 @@ class SelectionPanel {
         Rectangle cropImageButtonRec;
         Rectangle confirmCropButtonRec;
         Rectangle discardCropButtonRec;
+        Rectangle revertImageButtonRec;
         Color pixelColor;
         Color color1;
         Color color2;
@@ -48,6 +49,7 @@ class SelectionPanel {
         bool cropImageButtonPressed;
         bool confirmCropButtonPressed;
         bool discardCropButtonPressed;
+        bool revertImageButtonPressed;
         bool paletteLoaded;
         bool croppingImage;
 
@@ -58,17 +60,18 @@ class SelectionPanel {
             strcpy(filePath, "assets/env.png");
 
             rectangle = {960.0f, 0.0f, 960.0f, 1080.0f};
-            colorRec1 = {984.0f, 744.0f, 288.0f, 280.0f};
-            colorRec2 = {1296.0f, 744.0f, 288.0f, 280.0f};
-            colorRec3 = {1608.0f, 744.0f, 288.0f, 280.0f};
-            imageInputRec = {984.0f, 144.0f, 912.0f, 96.0f};
-            getImageButtonRec = {984.0f, 264.0f, 912.0f, 96.0f};
+            colorRec1 = {984.0f, 776.0f, 288.0f, 280.0f};
+            colorRec2 = {1296.0f, 776.0f, 288.0f, 280.0f};
+            colorRec3 = {1608.0f, 776.0f, 288.0f, 280.0f};
+            imageInputRec = {984.0f, 104.0f, 912.0f, 96.0f};
+            getImageButtonRec = {984.0f, 216.0f, 912.0f, 96.0f};
             getImageInstructionsRec = {984.0f, 24.0f, 912.0f, 96.0f};
-            colorPickInstructionsRec = {984.0f, 624.0f, 912.0f, 96.0f};
-            reloadPaletteButtonRec = {984.0f, 384.0f, 912.0f, 96.0f};
-            cropImageButtonRec = {984.0f, 504.0f, 912.0f, 96.0f};
-            confirmCropButtonRec = {984.0f, 504.0f, 448.0f, 96.0f};
-            discardCropButtonRec = {1448.0f, 504.0f, 448.0f, 96.0f};
+            colorPickInstructionsRec = {984.0f, 696.0f, 912.0f, 96.0f};
+            reloadPaletteButtonRec = {984.0f, 328.0f, 912.0f, 96.0f};
+            cropImageButtonRec = {984.0f, 440.0f, 912.0f, 96.0f};
+            confirmCropButtonRec = {984.0f, 440.0f, 448.0f, 96.0f};
+            discardCropButtonRec = {1448.0f, 440.0f, 448.0f, 96.0f};
+            revertImageButtonRec = {984.0f, 552.0f, 912.0f, 96.0f};
 
             pixelColor = BLACK;
             color1 = BLACK;
@@ -83,6 +86,7 @@ class SelectionPanel {
             cropImageButtonPressed = false;
             confirmCropButtonPressed = false;
             discardCropButtonPressed = false;
+            revertImageButtonPressed = false;
             paletteLoaded = false;
             croppingImage = false;
         }
