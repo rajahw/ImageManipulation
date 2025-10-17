@@ -67,7 +67,7 @@ class SelectionPanel {
             getImageButtonRec = {984.0f, 216.0f, 912.0f, 96.0f};
             getImageInstructionsRec = {984.0f, 24.0f, 912.0f, 96.0f};
             colorPickInstructionsRec = {984.0f, 696.0f, 912.0f, 96.0f};
-            reloadPaletteButtonRec = {984.0f, 328.0f, 912.0f, 96.0f};
+            reloadPaletteButtonRec = {984.0f, 328.0f, 912.0f, 96.0};
             cropImageButtonRec = {984.0f, 440.0f, 912.0f, 96.0f};
             confirmCropButtonRec = {984.0f, 440.0f, 448.0f, 96.0f};
             discardCropButtonRec = {1448.0f, 440.0f, 448.0f, 96.0f};
