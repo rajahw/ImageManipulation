@@ -30,7 +30,6 @@ class SelectionPanel {
         Rectangle cropImageButtonRec;
         Rectangle confirmCropButtonRec;
         Rectangle discardCropButtonRec;
-        Vector2 circlePosition;
         Color pixelColor;
         Color color1;
         Color color2;
