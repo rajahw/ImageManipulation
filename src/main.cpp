@@ -46,10 +46,7 @@ int main() {
 
             if (panel.reloadPaletteButtonPressed) {
                 std::cout << "Reload Palette Button Pressed" << '\n';
-                
-                panel.color1 = panel.oldColor1;
-                panel.color2 = panel.oldColor2;
-                panel.color3 = panel.oldColor3;
+                panel.reloadPalette();
             }
 
             if (panel.cropImageButtonPressed) {
@@ -103,7 +100,7 @@ int main() {
             if (panel.croppingImage) {
                 DrawRectangleRec(mouse.croppedRec, {255, 255, 255, 65});
             }
-
+ 
             //Draw Selection UI
             GuiPanel(panel.rectangle, NULL);
             panel.getImageButtonPressed = GuiButton(panel.getImageButtonRec, "GET IMAGE");
@@ -121,6 +118,8 @@ int main() {
                 panel.confirmCropButtonPressed = GuiButton(panel.confirmCropButtonRec, "CONFIRM CROP");
                 panel.discardCropButtonPressed = GuiButton(panel.discardCropButtonRec, "DISCARD CROP");
             }
+            GuiLabel(panel.imageListTextRec, "SAVED IMAGES");
+            GuiListView(panel.imageListRec, panel.imageList, &panel.imageListScrollIndex, &panel.imageListActive);
         
         EndDrawing();
     }

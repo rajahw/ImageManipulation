@@ -12,6 +12,7 @@ class SelectionPanel {
         char fileNameInput[128];
         char fileName[128];
         char filePath[128];
+        char imageList[128];
         Rectangle rectangle;
         Rectangle colorRec1;
         Rectangle colorRec2;
@@ -25,6 +26,8 @@ class SelectionPanel {
         Rectangle confirmCropButtonRec;
         Rectangle discardCropButtonRec;
         Rectangle revertImageButtonRec;
+        Rectangle imageListTextRec;
+        Rectangle imageListRec;
         Color pixelColor;
         Color color1;
         Color color2;
@@ -35,6 +38,8 @@ class SelectionPanel {
         int color1Freq;
         int color2Freq;
         int color3Freq;
+        int imageListScrollIndex;
+        int imageListActive;
         bool color1ButtonPressed;
         bool color2ButtonPressed;
         bool color3ButtonPressed;
@@ -51,4 +56,5 @@ class SelectionPanel {
         void updateImageInstructions(DisplayedImage& img);
         void getTopColors(DisplayedImage& img);
         void changeTopColors(DisplayedImage& img, Cursor& mouse);
+        void reloadPalette();
 };

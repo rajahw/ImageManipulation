@@ -9,5 +9,5 @@
 #include <cstring>
 #include <cstdint>
 
-inline uint16_t displayPanelWidth = 960;
+inline uint16_t displayPanelWidth = 680;
 inline uint16_t displayPanelHeight = 1080;

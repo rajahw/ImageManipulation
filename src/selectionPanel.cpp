@@ -7,25 +7,34 @@ SelectionPanel::SelectionPanel() {
     strcpy(fileNameInput, "");
     strcpy(fileName, "");
     strcpy(filePath, "assets/env.png");
+    strcpy(imageList, "ONE;TWO;THREE");
 
-    rectangle = {960.0f, 0.0f, 960.0f, 1080.0f};
-    colorRec1 = {984.0f, 776.0f, 288.0f, 280.0f};
-    colorRec2 = {1296.0f, 776.0f, 288.0f, 280.0f};
-    colorRec3 = {1608.0f, 776.0f, 288.0f, 280.0f};
-    imageInputRec = {984.0f, 104.0f, 912.0f, 96.0f};
-    getImageButtonRec = {984.0f, 216.0f, 912.0f, 96.0f};
-    getImageInstructionsRec = {984.0f, 24.0f, 912.0f, 96.0f};
-    colorPickInstructionsRec = {984.0f, 696.0f, 912.0f, 96.0f};
-    reloadPaletteButtonRec = {984.0f, 328.0f, 912.0f, 96.0f};
-    cropImageButtonRec = {984.0f, 440.0f, 912.0f, 96.0f};
-    confirmCropButtonRec = {984.0f, 440.0f, 448.0f, 96.0f};
-    discardCropButtonRec = {1448.0f, 440.0f, 448.0f, 96.0f};
-    revertImageButtonRec = {984.0f, 552.0f, 912.0f, 96.0f};
+    rectangle = {680.0f, 0.0f, 1240.0f, 1080.0f};
+    colorRec1 = {1176.0f, 832.0f, 224.0f, 224.0f};
+    colorRec2 = {1424.0f, 832.0f, 224.0f, 224.0f};
+    colorRec3 = {1672.0f, 832.0f, 224.0f, 224.0f};
+    imageInputRec = {1176.0f, 104.0f, 720.0f, 96.0f};
+    getImageButtonRec = {1176.0f, 216.0f, 720.0f, 96.0f};
+    getImageInstructionsRec = {1176.0f, 24.0f, 720.0f, 96.0f};
+    colorPickInstructionsRec = {1176.0f, 752.0f, 720.0f, 96.0f};
+    reloadPaletteButtonRec = {1176.0f, 328.0f, 720.0f, 96.0f};
+    cropImageButtonRec = {1176.0f, 440.0f, 720.0f, 96.0f};
+    confirmCropButtonRec = {1544.0f, 440.0f, 352.0f, 96.0f};
+    discardCropButtonRec = {1176.0f, 440.0f, 352.0f, 96.0f};
+    revertImageButtonRec = {1176.0f, 552.0f, 720.0f, 96.0f};
+    imageListTextRec = {704.0f, 24.0f, 456.0f, 96.0f};
+    imageListRec = {704.0f, 104.0f, 456.0f, 952.0f};
 
     pixelColor = BLACK;
     color1 = BLACK;
     color2 = BLACK;
     color3 = BLACK;
+
+    color1Freq = 0;
+    color2Freq = 0;
+    color3Freq = 0;
+    imageListScrollIndex = 0;
+    imageListActive = 0;
 
     color1ButtonPressed = false;
     color2ButtonPressed = false;
@@ -136,4 +145,10 @@ void SelectionPanel::changeTopColors(DisplayedImage& img, Cursor& mouse) {
         }
         mouse.selectedRec = 0;
     }
+}
+
+void SelectionPanel::reloadPalette() {
+    color1 = oldColor1;
+    color2 = oldColor2;
+    color3 = oldColor3;
 }

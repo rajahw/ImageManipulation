@@ -17,7 +17,7 @@ void DisplayedImage::load(SelectionPanel& panel) {
 
         ImageResize(&image, static_cast<int>(image.width * scale), static_cast<int>(image.height * scale));
         texture = LoadTextureFromImage(image);
-        rectangle = {(960.0f - image.width) / 2.0f, (1080.0f - image.height) / 2.0f, static_cast<float>(image.width), static_cast<float>(image.height)};
+        rectangle = {(panel.rectangle.x - image.width) / 2.0f, (panel.rectangle.height - image.height) / 2.0f, static_cast<float>(image.width), static_cast<float>(image.height)};
     } else {
         strcpy(panel.getImageInstructions, "Image failed to load (Invalid or nonexistent)");
     }
