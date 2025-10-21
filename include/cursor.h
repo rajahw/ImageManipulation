@@ -1,6 +1,6 @@
 #pragma once
 
-#include "main.h";
+#include "main.h"
 
 class Cursor {
     public:
@@ -11,12 +11,5 @@ class Cursor {
         Vector2 cropPoint;
         bool initialPointSelected;
 
-        Cursor() {
-            position = {};
-            selectedRec = 0;
-            croppedRec = {};
-            initialCropPoint = {};
-            cropPoint = {};
-            initialPointSelected = false;
-        }
+        Cursor();
 };
