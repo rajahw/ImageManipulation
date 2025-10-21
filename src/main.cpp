@@ -1,4 +1,7 @@
 #include "main.h"
+#include "selectionPanel.h"
+#include "displayedImage.h"
+#include "cursor.h"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
