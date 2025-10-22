@@ -6,6 +6,7 @@ void DisplayedImage::load(SelectionPanel& panel) {
     if (!panel.croppingImage) {image = LoadImage(panel.filePath);}
             
     if (IsImageValid(image)) {
+        panel.updateImageList();
         panel.paletteLoaded = false;
 
         //resize image to fit

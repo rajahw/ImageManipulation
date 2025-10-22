@@ -40,6 +40,8 @@ class SelectionPanel {
         int color3Freq;
         int imageListScrollIndex;
         int imageListActive;
+        int activeImage;
+        std::vector<std::string> storedImages;
         bool color1ButtonPressed;
         bool color2ButtonPressed;
         bool color3ButtonPressed;
@@ -51,10 +53,14 @@ class SelectionPanel {
         bool revertImageButtonPressed;
         bool paletteLoaded;
         bool croppingImage;
+        bool canLoadImage;
 
         SelectionPanel();
         void updateImageInstructions(DisplayedImage& img);
         void getTopColors(DisplayedImage& img);
         void changeTopColors(DisplayedImage& img, Cursor& mouse);
         void reloadPalette();
+        void updateImageList();
+        void switchImage();
+        bool imageStored(std::string);
 };

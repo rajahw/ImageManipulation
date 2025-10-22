@@ -2,7 +2,7 @@
 
 #include "raylib.h"
 #include <iostream>
-#include <array>
+#include <vector>
 #include <algorithm>
 #include <unordered_map>
 #include <queue>

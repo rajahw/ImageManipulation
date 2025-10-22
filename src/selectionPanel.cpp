@@ -7,7 +7,8 @@ SelectionPanel::SelectionPanel() {
     strcpy(fileNameInput, "");
     strcpy(fileName, "");
     strcpy(filePath, "assets/env.png");
-    strcpy(imageList, "ONE;TWO;THREE");
+    strcpy(imageList, "env.png");
+    storedImages = {"env.png"};
 
     rectangle = {680.0f, 0.0f, 1240.0f, 1080.0f};
     colorRec1 = {1176.0f, 832.0f, 224.0f, 224.0f};
@@ -35,6 +36,7 @@ SelectionPanel::SelectionPanel() {
     color3Freq = 0;
     imageListScrollIndex = 0;
     imageListActive = 0;
+    activeImage = 0;
 
     color1ButtonPressed = false;
     color2ButtonPressed = false;
@@ -47,13 +49,21 @@ SelectionPanel::SelectionPanel() {
     revertImageButtonPressed = false;
     paletteLoaded = false;
     croppingImage = false;
+    canLoadImage = true;
 }
 
 void SelectionPanel::updateImageInstructions(DisplayedImage& img) {
+    if (imageStored(fileName)) {
+        strcpy(getImageInstructions, "An image with this name is already stored");
+        canLoadImage = false;
+        return;
+    }
+
     if (IsFileNameValid(fileNameInput)) {
         if (IsFileExtension(fileNameInput, ".png")
         || IsFileExtension(fileNameInput, ".jpg")
         || IsFileExtension(fileNameInput, ".jpeg")) { //if extension is valid
+            canLoadImage =true;
             strcpy(fileName, fileNameInput);
 
             strcpy(filePath, "assets/");
@@ -70,6 +80,8 @@ void SelectionPanel::updateImageInstructions(DisplayedImage& img) {
     } else { //if extension is not valid
         strcpy(getImageInstructions, "Choose a file with a proper extension (png or jpg/jpeg)");
     }
+
+    strcpy(fileNameInput, "");
 }
 
 void SelectionPanel::getTopColors(DisplayedImage& img) {
@@ -151,4 +163,41 @@ void SelectionPanel::reloadPalette() {
     color1 = oldColor1;
     color2 = oldColor2;
     color3 = oldColor3;
+}
+
+//BOTH METHODS BELOW NEED FIXING
+//SWITCHIMAGE DOESN'T WORK ATM; NOTHING IS SWAPPING
+//FIND WAYS TO UNLOAD THE IMAGE, THEN ONLY USE THE TEXTURE FOR MOST THINGS
+//ADD A LIMIT TO HOW MANY IMAGES YOU CAN HAVE AT A TIME
+//OR MAYBE KEEP OLDIMAGE AND IMAGE LOADED ONLY, UNLOADING OLDIMAGE WHEN REVERT IS CALLED
+
+void SelectionPanel::updateImageList() {
+    if (fileName[0] == '\0') {return;}
+
+    //if image is already in the list, return
+    if (imageStored(fileName)) {return;}
+
+    strcat(imageList, ";");
+    strcat(imageList, fileName);
+    storedImages.push_back(fileName);
+    ++imageListActive;
+    ++activeImage;
+}
+
+void SelectionPanel::switchImage() {
+    activeImage = imageListActive;
+    strcpy(filePath, "assets/");
+    //strcat(filePath, storedImages[activeImage].c_str());
+    strcat(filePath, storedImages[imageListActive].c_str());
+    std::cout << filePath << "\n";
+}
+
+bool SelectionPanel::imageStored(std::string name) {
+    for (auto i : storedImages) {
+        if (i == name) {
+            return true;
+        }
+    }
+
+    return false;
 }

@@ -41,7 +41,7 @@ int main() {
             if (panel.getImageButtonPressed) {
                 std::cout << "Get Image Button Pressed" << '\n';
                 panel.updateImageInstructions(img);
-                img.load(panel);
+                if (panel.canLoadImage) {img.load(panel);}
             }
 
             if (panel.reloadPaletteButtonPressed) {
@@ -51,9 +51,9 @@ int main() {
 
             if (panel.cropImageButtonPressed) {
                 std::cout << "Crop Image Button Pressed" << '\n';
+                panel.croppingImage = true;
                 panel.cropImageButtonPressed = false;
                 //manually switch state since this button isn't always drawn
-                panel.croppingImage = true;
             }
 
             if (panel.revertImageButtonPressed) {
@@ -92,6 +92,11 @@ int main() {
             
             if ((mouse.selectedRec == 1 || mouse.selectedRec == 2 || mouse.selectedRec == 3)) {
                 panel.changeTopColors(img, mouse);
+            }
+
+            if (panel.activeImage != panel.imageListActive) {
+                panel.switchImage();
+                img.load(panel);
             }
 
             //Draw Image
