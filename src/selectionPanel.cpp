@@ -53,8 +53,9 @@ SelectionPanel::SelectionPanel() {
 }
 
 void SelectionPanel::updateImageInstructions(DisplayedImage& img) {
-    if (imageStored(fileName)) {
-        strcpy(getImageInstructions, "An image with this name is already stored");
+    if (imageStored(fileNameInput)) {
+        strcpy(getImageInstructions, "An image with that name is already stored");
+        strcpy(fileNameInput, "");
         canLoadImage = false;
         return;
     }
@@ -63,7 +64,7 @@ void SelectionPanel::updateImageInstructions(DisplayedImage& img) {
         if (IsFileExtension(fileNameInput, ".png")
         || IsFileExtension(fileNameInput, ".jpg")
         || IsFileExtension(fileNameInput, ".jpeg")) { //if extension is valid
-            canLoadImage =true;
+            canLoadImage = true;
             strcpy(fileName, fileNameInput);
 
             strcpy(filePath, "assets/");
@@ -172,10 +173,7 @@ void SelectionPanel::reloadPalette() {
 //OR MAYBE KEEP OLDIMAGE AND IMAGE LOADED ONLY, UNLOADING OLDIMAGE WHEN REVERT IS CALLED
 
 void SelectionPanel::updateImageList() {
-    if (fileName[0] == '\0') {return;}
-
-    //if image is already in the list, return
-    if (imageStored(fileName)) {return;}
+    if (fileName[0] == '\0' || imageStored(fileName)) {return;}
 
     strcat(imageList, ";");
     strcat(imageList, fileName);
@@ -187,7 +185,6 @@ void SelectionPanel::updateImageList() {
 void SelectionPanel::switchImage() {
     activeImage = imageListActive;
     strcpy(filePath, "assets/");
-    //strcat(filePath, storedImages[activeImage].c_str());
     strcat(filePath, storedImages[imageListActive].c_str());
     std::cout << filePath << "\n";
 }

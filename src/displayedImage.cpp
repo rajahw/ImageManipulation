@@ -3,7 +3,10 @@
 #include "cursor.h"
 
 void DisplayedImage::load(SelectionPanel& panel) {
-    if (!panel.croppingImage) {image = LoadImage(panel.filePath);}
+    if (!panel.croppingImage) {
+        if (IsImageValid(image)) {UnloadImage(image);}
+        image = LoadImage(panel.filePath);
+    }
             
     if (IsImageValid(image)) {
         panel.updateImageList();
@@ -17,6 +20,7 @@ void DisplayedImage::load(SelectionPanel& panel) {
         }
 
         ImageResize(&image, static_cast<int>(image.width * scale), static_cast<int>(image.height * scale));
+        if (IsTextureValid(texture)) {UnloadTexture(texture);}
         texture = LoadTextureFromImage(image);
         rectangle = {(panel.rectangle.x - image.width) / 2.0f, (panel.rectangle.height - image.height) / 2.0f, static_cast<float>(image.width), static_cast<float>(image.height)};
     } else {

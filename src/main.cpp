@@ -94,7 +94,9 @@ int main() {
                 panel.changeTopColors(img, mouse);
             }
 
-            if (panel.activeImage != panel.imageListActive) {
+            if (panel.imageListActive != panel.activeImage &&
+                panel.imageListActive >= 0 &&
+                panel.imageListActive < panel.storedImages.size()) {
                 panel.switchImage();
                 img.load(panel);
             }
