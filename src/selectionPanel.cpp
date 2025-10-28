@@ -3,7 +3,7 @@
 #include "cursor.h"
 
 SelectionPanel::SelectionPanel() {
-    strcpy(getImageInstructions, "Type the file name of your image (including png or jpg/jpeg extension)\n\nto retrieve it");
+    strcpy(getImageInstructions, "Type the file name of your image (including png or\n\njpg/jpeg extension) to retrieve it");
     strcpy(fileNameInput, "");
     strcpy(fileName, "");
     strcpy(filePath, "assets/env.png");
@@ -71,7 +71,7 @@ void SelectionPanel::updateImageInstructions(DisplayedImage& img) {
             strcat(filePath, fileName);
 
             if (FileExists(filePath)) {
-                strcpy(getImageInstructions, "Type the file name of your image (including png or jpg/jpeg\n\nextension) to retrieve it");
+                strcpy(getImageInstructions, "Type the file name of your image (including png or\n\njpg/jpeg extension) to retrieve it");
             }
 
         } else { //if extension is not valid

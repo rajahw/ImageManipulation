@@ -118,7 +118,7 @@ int main() {
             panel.color2ButtonPressed = coloredButton(panel.colorRec2, panel.color2);
             panel.color3ButtonPressed = coloredButton(panel.colorRec3, panel.color3);
             GuiLabel(panel.getImageInstructionsRec, panel.getImageInstructions);
-            GuiLabel(panel.colorPickInstructionsRec, "To replace a palette color, select a color below, then pick one from\n\nthe image");
+            GuiLabel(panel.colorPickInstructionsRec, "To replace a palette color, select a color below, then\n\npick one from the image");
             if (!panel.croppingImage) {
                 panel.cropImageButtonPressed = GuiButton(panel.cropImageButtonRec, "CROP IMAGE");
             } else {
