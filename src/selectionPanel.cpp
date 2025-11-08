@@ -63,7 +63,7 @@ void SelectionPanel::updateImageInstructions(DisplayedImage& img) {
     if (IsFileNameValid(fileNameInput)) {
         if (IsFileExtension(fileNameInput, ".png")
         || IsFileExtension(fileNameInput, ".jpg")
-        || IsFileExtension(fileNameInput, ".jpeg")) { //if extension is valid
+        || IsFileExtension(fileNameInput, ".jpeg")) {
             canLoadImage = true;
             strcpy(fileName, fileNameInput);
 
@@ -74,11 +74,11 @@ void SelectionPanel::updateImageInstructions(DisplayedImage& img) {
                 strcpy(getImageInstructions, "Type the file name of your image (including png or\n\njpg/jpeg extension) to retrieve it");
             }
 
-        } else { //if extension is not valid
+        } else {
             strcpy(getImageInstructions, "Choose a file with a proper extension (png or jpg/jpeg)");
         }
                 
-    } else { //if extension is not valid
+    } else {
         strcpy(getImageInstructions, "Choose a file with a proper extension (png or jpg/jpeg)");
     }
 
@@ -165,12 +165,6 @@ void SelectionPanel::reloadPalette() {
     color2 = oldColor2;
     color3 = oldColor3;
 }
-
-//BOTH METHODS BELOW NEED FIXING
-//SWITCHIMAGE DOESN'T WORK ATM; NOTHING IS SWAPPING
-//FIND WAYS TO UNLOAD THE IMAGE, THEN ONLY USE THE TEXTURE FOR MOST THINGS
-//ADD A LIMIT TO HOW MANY IMAGES YOU CAN HAVE AT A TIME
-//OR MAYBE KEEP OLDIMAGE AND IMAGE LOADED ONLY, UNLOADING OLDIMAGE WHEN REVERT IS CALLED
 
 void SelectionPanel::updateImageList() {
     if (fileName[0] == '\0' || imageStored(fileName)) {return;}
